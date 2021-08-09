@@ -2,7 +2,6 @@ function computeParetoFront(susceptibilityFactor,maxPrct,VcPrct,betaVac,nuVac,ef
 addpath('/Users/nirgavish/Dropbox (Technion Dropbox)/My Shared Functions')
 addpath('../Codes/AllCountries/AuxilaryFunctions/');
 
-
 if nargin<7
     vaccineRange='All';
 end
@@ -21,12 +20,12 @@ fname=['./data/dataParetoFront_susFactor=',num2str(100*susceptibilityFactor),'_m
 country="USA";
 % vaccineRangeVec={'above20','above16','above12','above6','All'};
 %% Prepare data
-[uniformAllocation,riskFocusedAllocation,spreadersAllocation,upperBound,vaccinesLeftToDistibute,adultAges,ageAbove60,age40to60,age20to40,IFR,Cij,Ni,Nadult,r,v,infected0_v,infected0_nv]=prepareFinalSizeParameters(country,vaccineRange,recoveredprct,infected_nv_prct,infected_v_prct,0.99*VcPrct,betaVac,effVac,maxPrct,true);
+[uniformAllocation,riskFocusedAllocation,spreadersAllocation,upperBound,vaccinesLeftToDistibute,adultAges,ageAbove60,age40to60,age20to40,IFR,Cij,Ni,Nadult,r,v,infected0_v,infected0_nv]=prepareFinalSizeParameters(country,vaccineRange,recoveredprct,infected_nv_prct,infected_v_prct,VcPrct,betaVac,effVac,maxPrct,true);
 susceptibilityProfile=ones(9,1);susceptibilityProfile(1:2)=susceptibilityFactor;
-Cij=diag(susceptibilityProfile.*Ni)*Cij*diag(1./Ni);[V,d]=eig(Cij);Cij=Cij/max(d(:));
+Cij=diag(susceptibilityProfile)*Cij;M2=diag(Ni)*Cij*diag(1./Ni);[V,d]=eig(M2);Cij=Cij/max(d(:));
 
 %% Define optimization problem
-problem.options = optimoptions('fmincon','MaxFunctionEvaluations',5e4,'ConstraintTolerance',1e-6,'StepTolerance',1e-10,'Display','none');%,'Algorithm','sqp','Display','none');%,'Display','iter');
+problem.options = optimoptions('fmincon','MaxFunctionEvaluations',5e4,'ConstraintTolerance',1e-6,'StepTolerance',1e-10,'Display','none');%,'Algorithm','sqp','Display','none');%,'Display','iter');     
 problem.solver = 'fmincon';
 problem.Aeq=Nadult';problem.Beq=vaccinesLeftToDistibute;
 problem.A=[];problem.B=[];
@@ -36,12 +35,22 @@ problem.ub=upperBound;
 defineColors;
 %% Run loop
 
-[dummy,overallInfected_uniform,overallMortality_uniform,data_uniform]=computeFinalSize_generalized(uniformAllocation,adultAges,IFR,0,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
+[dummy,overallInfected_uniform,overallMortality_uniform]=computeFinalSize_generalized(uniformAllocation,adultAges,IFR,0,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
+[dummy2,overallInfected_uniform2,overallMortality_uniform2]=computeFinalSize(uniformAllocation,adultAges,IFR,0,R0,Cij,Ni,r,v,infected0_v,infected0_nv,betaVac,effVac,1,1);
 
 Msample=5000;M=800;
 %% First solve for infection minimizing allocation
 w=0;
 [result,overallInfected_spreaders,overallMortality_spreaders,data_spreaders]=computeFinalSize_generalized(spreadersAllocation,adultAges,IFR,0,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
+% spreadersAllocation=[  0.000000000020792
+%    0.775954805573448
+%    0.999999998655929
+%    0.999999999994571
+%    0.999999999989587
+%    0.433800985346574
+%    0.000000000007171
+%    0.000000000006430
+%    0.000000000015396]
 [x,fval,exitflag,output]=fmincon(@(x)computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1),spreadersAllocation,problem.A,problem.B,problem.Aeq,problem.Beq,problem.lb,problem.ub,[],problem.options);
 [dummy,overallInfected(1),overallMortality(1),data{1}]=computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
 distribution{1}=x;
@@ -78,6 +87,15 @@ end
 %% Next solve for mortality minimizing allocation
 w=1;
 [result,overallInfected_riskFocused,overallMortality_riskFocused,data_riskFocused]=computeFinalSize_generalized(riskFocusedAllocation,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
+% spreadersAllocation=[                0
+%                    0
+%                    0
+%    0.538280868634493
+%    1.000000000000000
+%    1.000000000000000
+%    1.000000000000000
+%    1.000000000000000
+%    1.000000000000000];
 x=fmincon(@(x)computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1),spreadersAllocation,problem.A,problem.B,problem.Aeq,problem.Beq,problem.lb,problem.ub,[],problem.options);
 [dummy,overallInfected(M),overallMortality(M),data{M}]=computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
 distribution{M}=x;

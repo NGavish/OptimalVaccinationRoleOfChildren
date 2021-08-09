@@ -8,10 +8,12 @@ if nargin<8
 end
 if nargin<9
     recoveredprct=0;
-    fname=['dataParetoFront_susFactor=',num2str(100*susceptibilityFactor),'_maxPrct',num2str(maxPrct),'_VcPrct=',num2str(10*VcPrct),'_betaVac=',num2str(betaVac*100),'_nuVac=',num2str(10*nuVac)];
-else
-    fname=['dataParetoFront_susFactor=',num2str(100*susceptibilityFactor),'_maxPrct',num2str(maxPrct),'_VcPrct=',num2str(10*VcPrct),'_betaVac=',num2str(betaVac*100),'_nuVac=',num2str(10*nuVac),'_recoveredPrct=',num2str(10*recoveredprct)];
 end
+
+%fname=['dataParetoFront_susFactor=',num2str(100*susceptibilityFactor),'_maxPrct',num2str(maxPrct),'_VcPrct=',num2str(10*VcPrct),'_betaVac=',num2str(betaVac*100),'_nuVac=',num2str(10*nuVac)];
+% else
+     fname=['dataParetoFront_susFactor=',num2str(100*susceptibilityFactor),'_maxPrct',num2str(maxPrct),'_VcPrct=',num2str(10*VcPrct),'_betaVac=',num2str(betaVac*100),'_nuVac=',num2str(10*nuVac),'_recoveredPrct=',num2str(10*recoveredprct)];
+% end
 if nargin==10
     fname=fnameParm;R0=35;useconvhull=true;
 end
@@ -43,16 +45,22 @@ if useconvhull
     data.overallMortality=data.overallMortality(k(:));
     data.infectionVec=data.infectionVec(k(:));
 end
+
 switch vaccineRange
     case 'All'
         randColor=turquoise;alphaValue=0.25;
-        vaccineRangeTxt='All elibigle';
+        vaccineRangeTxt='All ages';
         markerType='s'
+    case 'above20'
+        randColor=yellow;alphaValue=0.25;
+        vaccineRangeTxt='Ages 20 and older';
+        markerType='o'
     case 'Above20'
         randColor=yellow;alphaValue=0.25;
-        vaccineRangeTxt='Eligibility above 20';
+        vaccineRangeTxt='Ages 20 and older';
         markerType='o'
-            case 'above16'
+
+    case 'above16'
         randColor=yellow;alphaValue=0.25;
         vaccineRangeTxt='Eligibility above 16';
         markerType='o'
