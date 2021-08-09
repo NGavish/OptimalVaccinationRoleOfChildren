@@ -2,7 +2,7 @@ function presentData_susceptibility
 close all;
 defineColors;
 tiledlayout(2,2, 'TileSpacing', 'compact','Padding','none');
-  susceptiblityTxt={'15','20'};
+  susceptiblityTxt={'1020','2020'};
 for jx_idx=1:2
   
 load(['dataVthreshold_betaVac20_susceptibilityFactor',susceptiblityTxt{jx_idx},'recoveredPrct_0']);
@@ -26,7 +26,9 @@ Rthreshold=Threshold(1,end);
 ylabel('V_{threshold} (% of all population)')
 xlabel('R_0');
 ytickformat( 'percentage');
-legend('Eligibilty - ages 20 and older','Eligibilty - ages 10 and older','Eligibilty - all ages','Homogeneous Threshold','location','best','autoupdate','off');
+legend('Allocation to ages 20 and older','Allocation to ages 10 and older','Allocation to all ages','Homogeneous Threshold','location','best','autoupdate','off');
+
+%legend('Eligibilty - ages 20 and older','Eligibilty - ages 10 and older','Eligibilty - all ages','Homogeneous Threshold','location','best','autoupdate','off');
 yyaxis right;plot(1./s,VcPrctVec,'k:');
 ylim(100*[0 sum(Ni)./sum(Ni(3:9))]);
 ylabel('V_{threshold} (% of adult population)')
@@ -81,17 +83,17 @@ end
 gray=0.8*[1 1 1];
 for jx_idx=1:2
     
-load('dataVthreshold_betaVac20_susceptibilityFactor10recoveredPrct_0');hold on;
+load('dataVthreshold_betaVac20_susceptibilityFactor1010recoveredPrct_0');hold on;
 jx=jx_idx;
 axVec{jx}=nexttile(jx);
 
 prct20plus=100*sum(Ni(3:9))/sum(Ni);a=min(find(VcGnrl>prct20plus));
-yyaxis left;plot(Threshold(1,1:a),VcGnrl(1:a),'-.','Color',gray,'linewidth',1.5);hold on;
+yyaxis left;%plot(Threshold(1,1:a),VcGnrl(1:a),'-.','Color',gray,'linewidth',1.5);hold on;
 Rcritical20=Threshold(1,a);ylim([0 100]);
 prct10plus=100*sum(Ni(2:9))/sum(Ni);a=min(find(VcGnrl>prct10plus));
-yyaxis left;plot(Threshold(2,1:a),VcGnrl(1:a),'-','Color',gray,'linewidth',1.5);
-Rcritical10=Threshold(2,a);
-plot(Threshold(3,:),VcGnrl,'--','Color',gray,'linewidth',1.5);
+ yyaxis left;%plot(Threshold(2,1:a),VcGnrl(1:a),'-','Color',gray,'linewidth',1.5);
+%Rcritical10=Threshold(2,a);
+% plot(Threshold(3,:),VcGnrl,'--','Color',gray,'linewidth',1.5);
 
 s=max(1-(1-betaVac)*VcGnrl/100-recoveredprct/100,0);
 
@@ -103,8 +105,8 @@ lg = legend(axVec{4},Ages,'fontsize',10,'Orientation','horizontal');%legend(next
  lg.Layout.Tile='south'
 
 set(gcf,'Position',[520 426 942 486]);
-title(axVec{1},'Increased children susceptibility by factor of 1.5')
-title(axVec{2},'Increased children susceptibility by factor of 2')
+title(axVec{1},'Adolescents (ages 10-19) are equally susceptible as adults');
+title(axVec{2},'Children (ages 0-19) are equally susceptible as adults');
 text(axVec{1},0.05,0.9,'A','units','normalized','fontweight','bold','fontsize',12);
 text(axVec{2},0.05,0.9,'C','units','normalized','fontweight','bold','fontsize',12);
 text(axVec{3},0.05,0.9,'B','units','normalized','fontweight','bold','fontsize',12);

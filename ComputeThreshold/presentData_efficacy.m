@@ -5,7 +5,7 @@ tiledlayout(2,2, 'TileSpacing', 'compact','Padding','none');
   betaVacTxt={'15','25'};
 for jx_idx=1:2
 
-load(['dataVthreshold_betaVac',betaVacTxt{jx_idx},'_susceptibilityFactor10recoveredPrct_0']);
+load(['dataVthreshold_betaVac',betaVacTxt{jx_idx},'_susceptibilityFactor1010recoveredPrct_0']);
 jx=jx_idx;
 
 axVec{jx}=nexttile(jx);
@@ -27,7 +27,7 @@ Rthreshold=Threshold(1,end);
 ylabel('V_{threshold} (% of all population)')
 xlabel('R_0');
 ytickformat( 'percentage');
-legend('Eligibilty - ages 20 and older','Eligibilty - ages 10 and older','Eligibilty - all ages','Homogeneous Threshold','location','best','autoupdate','off');
+legend('Allocation to ages 20 and older','Allocation to ages 10 and older','Allocation to all ages','Homogeneous Threshold','location','best','autoupdate','off');
 yyaxis right;plot(1./s,VcPrctVec,'k:');
 ylim(100*[0 sum(Ni)./sum(Ni(3:9))]);
 ylabel('V_{threshold} (% of adult population)')

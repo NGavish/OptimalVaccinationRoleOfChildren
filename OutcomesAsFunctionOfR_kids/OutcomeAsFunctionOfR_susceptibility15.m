@@ -5,8 +5,8 @@ close all
 %% Parameters
 
 fname='default';
-susceptibilityProfile=ones(1,9);susceptibilityProfile(1:2)=1.5;susFactor='15'
-susFactorText=['susceptiblityFactor=20'];
+susceptibilityProfile=ones(1,9);susceptibilityProfile(1:2)=[1 2];susFactor='15'
+susFactorText=['susceptiblityFactor=1020'];
 
 betaVac=0.2; effVac=0.75;recoveredprct=0;infected_nv_prct=0;infected_v_prct=0;
 % The percent of 20+ population that have vaccines avaliable
@@ -209,7 +209,7 @@ lineStyle={'-','--','-.'}
 
 for kx=1:numel(VcPrctVec)
     close all;
-t=tiledlayout(3,2, 'TileSpacing','compact','Padding','none')
+    t=tiledlayout(3,2, 'TileSpacing','compact','Padding','none')
     VcPrct=VcPrctVec(kx);
 %     overallFatality_w1_base=data.overallFatality_w1/1e6;
 
@@ -234,14 +234,14 @@ t=tiledlayout(3,2, 'TileSpacing','compact','Padding','none')
         axVec{1}=nexttile(1);plot(Rvec,overallInfected_nv_w0,'linewidth',2,'linestyle',lineStyle{ix});hold on;
 %        plot(Rvec,overallInfected_nv_uniform,'color','k','linewidth',2,'linestyle','-.');hold on;
         grid on;box on;ax = gca;ax.YRuler.Exponent = 0;
-        xlabel('R_0');ylabel('Non-vaccinated infectives');
+        xlabel('R_0');ylabel('Overall infected');
         ytickformat('%gM');%ylim([0 85])
         axVec{2}=nexttile(2);plot(Rvec,overallInfected_nv_w1,'linewidth',2,'linestyle',lineStyle{ix});hold on;
 %        plot(Rvec,overallInfected_nv_uniform,'color',blue,'linewidth',2,'linestyle','-.');hold on;
 %         plot(Rvec,overallInfected_nv_w1_base,'color',darkgray','linewidth',2,'linestyle',':');
 %        alpha(0.2); 
         grid on;box on;ax = gca;ax.YRuler.Exponent = 0;
-        xlabel('R_0');ylabel('Non-vaccinated infectives');
+        xlabel('R_0');ylabel('Overall infected');
         ytickformat('%gM');%ylim([0 85])
         %title('Additional non-vaccinated infectives');
         
@@ -308,8 +308,8 @@ t=tiledlayout(3,2, 'TileSpacing','compact','Padding','none')
         for ix=1:9
             hndl(ix).FaceColor=lineColors(ix,:);
         end
-         for a=400
-                      currY=0;
+         for a=700
+         currY=0;
 
          for ix=1:5
              currY=currY+dataMat(a,ix);
@@ -335,7 +335,7 @@ t=tiledlayout(3,2, 'TileSpacing','compact','Padding','none')
 
  ytickformat('%4gM')        
          textAges={'0-9','10-19','20-29','30-39','40-49','50-59','60-69','70-79','80+'};
-         currY=0;a=400
+         currY=0;a=700
          for ix=2:9
              currY=currY+dataMat(a,ix);
              if dataMat(a,ix)>sum(dataMat(a,:))/50
@@ -353,7 +353,7 @@ t=tiledlayout(3,2, 'TileSpacing','compact','Padding','none')
     lg.Layout.Tile='north'
     set(gcf, 'Position', [72 130 831 600]);
     %sgtitle(['Vaccination of ',num2str(100*VcGnrl,2),'% of total population (',num2str(VcPrct),'% of adult population)']);
-    sgtitle('Susceptibilty of age group 0-19 increased by a factor of 1.5');
+    sgtitle('Adolescents (age group 10-19) are equally susceptible as adult');
     set(axVec{1},'xtick',[1 R_threshold(3) 1.5 2 R_threshold(2) 3:0.5:4],'xticklabel',{'1','R_{threshold}^{20+}','','2','  R_{threshold}^{10+}','3','3.5','4'},'XTickLabelRotation',0);
     set(axVec{3},'xtick',[1 R_threshold(3) 1.5 2 R_threshold(2) 3:0.5:4],'xticklabel',{'1','R_{threshold}^{20+}','','2','  R_{threshold}^{10+}','3','3.5','4'},'XTickLabelRotation',0);
     set(axVec{2},'xtick',[1 R_threshold(3) 1.5 2 R_threshold(2) 3:0.5:4],'xticklabel',{'1','R_{threshold}^{20+}','','2','  R_{threshold}^{10+}','3','3.5','4'},'XTickLabelRotation',0);
@@ -370,7 +370,7 @@ t=tiledlayout(3,2, 'TileSpacing','compact','Padding','none')
 shg
 % set(t(2),'Position',[3.1 25.5370470957899 0]);
 % set(t(4),'Position',[2.54623115577889 26 0]);
-set(t(9),'Position',[2.5935 182.2305 0]);
+% set(t(9),'Position',[2.5935 182.2305 0]);
 % shg
 
         Ages={'0-9','10-19','20-29','30-39','40-49','50-59','60-69','70-79','80+'};
@@ -379,7 +379,7 @@ set(t(9),'Position',[2.5935 182.2305 0]);
         lg.Layout.Tile='south'
         
 
-         title(axVec{1},'Allocations minizing infections');
+         title(axVec{1},'Allocations minimizing infections');
 
          
      printGraph(['../graphs/',fname,'outComesAsFunctionOfR,VcPrct_',num2str(10*VcPrct),'susFactor',susFactor]);

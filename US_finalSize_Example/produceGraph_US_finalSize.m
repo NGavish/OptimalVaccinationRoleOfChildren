@@ -4,7 +4,7 @@ if nargin<1
 end
 
 % Relative susceptibility of vaccined individuals & efficacy of vaccine in preventing disease
-R0=3;betaVac=0.2;nuVac=1;effVac=0.75;VcPrct=73.2;susceptibilityFactor=1; fname='US_finalSize_Example';
+R0=3;betaVac=0.2;nuVac=1;effVac=0.75;VcPrct=73.2;susceptibilityFactor=[1 1]; fname='US_finalSize_Example';
 if allOrNone
     betaVac=0;nuVac=0.8;fname=[fname,'_allOrNone'];
 end
@@ -65,10 +65,10 @@ for ix=1:3
 end
 linkaxes([axVec{1} axVec{2} axVec{3}],'xy');
 xlim(axVec{1},[0.5 9.5])
-lg = legend(axVec{3},'Vaccinated susceptible','Vaccinated infected','Recovered','Non-vaccinated infected','location','northeast','fontsize',10);%,'Orientation','horizontal');%legend(nexttile(2), [line1,line2,line3,line4]);
+lg = legend(axVec{3},'Vaccinated susceptible','Vaccinated removed','Pre-existing immunity','Non-vaccinated removed','location','northeast','fontsize',10);%,'Orientation','horizontal');%legend(nexttile(2), [line1,line2,line3,line4]);
 axVec{1}.Children(13)
-lg = legend([axVec{1}.Children(15) axVec{1}.Children(14) axVec{1}.Children(12)],'Vaccinated susceptible','Vaccinated infected','Non-vaccinated infected','location','northeast','fontsize',10);%,'Orientation','horizontal');%legend(nexttile(2), [line1,line2,line3,line4]);
-lg = legend([axVec{2}.Children(15) axVec{1}.Children(14) axVec{1}.Children(12)],'Vaccinated susceptible','Vaccinated infected','Non-vaccinated infected','location','northeast','fontsize',10);%,'Orientation','horizontal');%legend(nexttile(2), [line1,line2,line3,line4]);
+lg = legend([axVec{1}.Children(15) axVec{1}.Children(14) axVec{1}.Children(12)],'Vaccinated susceptible','Vaccinated removed','Non-vaccinated removed','location','northeast','fontsize',10);%,'Orientation','horizontal');%legend(nexttile(2), [line1,line2,line3,line4]);
+lg = legend([axVec{2}.Children(15) axVec{1}.Children(14) axVec{1}.Children(12)],'Vaccinated susceptible','Vaccinated removed','Non-vaccinated removed','location','northeast','fontsize',10);%,'Orientation','horizontal');%legend(nexttile(2), [line1,line2,line3,line4]);
 ylim(axVec{3},[0 50.1])
 text(axVec{1},0.02,0.92,'A','units','normalized','fontsize',11)
 text(axVec{2},0.02,0.92,'B','units','normalized','fontsize',11)

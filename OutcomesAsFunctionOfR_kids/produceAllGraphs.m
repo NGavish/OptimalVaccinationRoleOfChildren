@@ -3,6 +3,7 @@ collectData=false;
 
 allOrNone=false;susceptibilityFactor=1;
 outcomeAsFunctionofR(collectData,allOrNone,susceptibilityFactor) % default
+
 allOrNone=true;
 outcomeAsFunctionofR(collectData,allOrNone,susceptibilityFactor) % all-or-none
 

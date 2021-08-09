@@ -354,7 +354,7 @@ t=tiledlayout(3,2, 'TileSpacing','compact','Padding','none')
     lg.Layout.Tile='north'
     set(gcf, 'Position', [72 130 831 600]);
     %sgtitle(['Vaccination of ',num2str(100*VcGnrl,2),'% of total population (',num2str(VcPrct),'% of adult population)']);
-    sgtitle('Susceptibilty of age group 0-19 increased by a factor of 2');
+    sgtitle('Children (age group 0-19) are equally susceptible as adult');
     set(axVec{1},'xtick',[1 R_threshold(3) 1.5 2 R_threshold(2) 3:0.5:4],'xticklabel',{'1','R_{threshold}^{20+}','','2','  R_{threshold}^{10+}','3','3.5','4'},'XTickLabelRotation',0);
     set(axVec{3},'xtick',[1 R_threshold(3) 1.5 2 R_threshold(2) 3:0.5:4],'xticklabel',{'1','R_{threshold}^{20+}','','2','  R_{threshold}^{10+}','3','3.5','4'},'XTickLabelRotation',0);
     set(axVec{2},'xtick',[1 R_threshold(3) 1.5 2 R_threshold(2) 3:0.5:4],'xticklabel',{'1','R_{threshold}^{20+}','','2','  R_{threshold}^{10+}','3','3.5','4'},'XTickLabelRotation',0);
@@ -374,7 +374,7 @@ shg
 % set(t(9),'Position',[2.5462 185 0]);
 % shg
 
-         title(axVec{1},'Allocations minizing infections');
+         title(axVec{1},'Allocations minimizing infections');
 
                 Ages={'0-9','10-19','20-29','30-39','40-49','50-59','60-69','70-79','80+'};
         lg = legend(Ages,'fontsize',10,'Orientation','horizontal');%legend(nexttile(2), [line1,line2,line3,line4]);
