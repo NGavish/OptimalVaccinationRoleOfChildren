@@ -1,3 +1,4 @@
+% This code produces Figure 3 - "Critical reproduction numbers." - and related SI figures
 produceGraph_Reff4differentCountries;
 produceGraph_Reff4differentCountries_vaccineHesitancy;
 produceGraph_Reff4differentCountries_vaccineEfficacy;

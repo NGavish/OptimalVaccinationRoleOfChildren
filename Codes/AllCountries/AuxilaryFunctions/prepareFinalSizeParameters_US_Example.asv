@@ -1,0 +1,48 @@
+function [uniformAllocation,riskFocusedAllocation,spreadersAllocation,upperBound,vaccinesLeftToDistibute,adultAges,ageAbove60,age40to60,age20to40,IFR,Cij,Ni,Nadult,r,v,infected0_v,infected0_nv]=prepareFinalSizeParameters_US_Example(VcPrctChildren,betaVac,effVac,maxPrct)
+% countryList={"BEL", "USA", "IND", "ESP", "ZWE", "BRA", "CHN", "ZAF", "POL"};
+% R0=3;
+% recoveredprct=0;
+% infected_nv_prct=0;
+% infected_v_prct=0;
+% VcPrct=80; % The percent of 20+ population that have vaccines avaliable
+% betaVac=0.2; % Relative suscebtibility of vaccined individuals
+% effVac=0.95; % Efficacy of vaccine in preventing disease
+% maxPrct=95; % Maximal vaccination per age group
+
+%% Load country data
+countryData=load(join(['../countryData/USA_data.mat'],''));
+
+%% Prepare data
+Cij=countryData.contactMatrix;
+IFR=countryData.IFR';
+N=countryData.N;
+Ni=N*countryData.agDist;
+ageAbove20=3:9;ageAbove60=7:9;age40to60=5:6;age20to40=3:4;
+ageAbove60=ageAbove60-2;age40to60=age40to60-2;age20to40=age20to40-2; % index 1 refers to first adult age
+
+upperboundFilter=ones(size(Ni));
+Nadult=Ni;
+adultAges=1:9;
+
+% Compute next generation matrix & scale contact matrix
+Mij=diag(Ni)*Cij*diag(1./Ni);
+[V,d]=eig(Mij);
+Cij=Cij/d(1);
+infectedDistribution=V(:,1)/sum(V(:,1)); % Extract age distribution of infectvies from largest e.v. of ngm
+
+% Initialize susceptible, recovered, vaccinated and active infectives
+
+v=[0;0.62;0.7;0.7;0.78;0.86;0.99;0.98;0.96];
+r=[0.057050628;0.109163871;0.147859374;0.137971658;0.13368913;0.120521368;0.093210065;0.080994519;0.097896783]
+Vc=[0.5*Ni(1)+Ni(2)*0.2]*VcPrctChildren/100;
+s=max(1-r-v,0);
+
+% Compute uniform allocation of vaccines
+ageFilter=0*Ni;ageFilter(adultAges)=true;
+vaccinesLeftToDistibute=Vc;
+upperBound=max(s(adultAges)-(1-maxPrct/100),0);upperBound=min(upperboundFilter(adultAges),upperBound);
+uniformAllocation=computeUniformAllocation(s,adultAges,Nadult,vaccinesLeftToDistibute,upperBound);
+riskFocusedAllocation=computeRiskFocusedAllocation(s,adultAges,Nadult,vaccinesLeftToDistibute,upperBound);
+spreadersAllocation=computeSpreadersAllocation(s,adultAges,Nadult,vaccinesLeftToDistibute,upperBound);
+infected0_v=0*Ni;infected0_nv=0*Ni;
+return

@@ -1,5 +1,6 @@
 function computeThresholdData(betaVac,susceptibilityFactor,recoveredprct)
 %% Parameters
+[status,msg]=mkdir('./data');
 fname=['Vthreshold_betaVac',num2str(100*betaVac),'_susceptibilityFactor',num2str(susceptibilityFactor(1)*10),num2str(susceptibilityFactor(2)*10),'recoveredPrct_',num2str(10*recoveredprct)];
 
 % Set efficacy in preventing disease so that overall protection in 95%
@@ -76,7 +77,7 @@ for kx=1:numel(VcPrctVec)
 end
 
 
-save(['data',fname]);
+save(['./data/data',fname]);
 
 return
 

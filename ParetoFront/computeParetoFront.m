@@ -2,11 +2,12 @@ function computeParetoFront(susceptibilityFactor,maxPrct,VcPrct,betaVac,nuVac,ef
 addpath('/Users/nirgavish/Dropbox (Technion Dropbox)/My Shared Functions')
 addpath('../Codes/AllCountries/AuxilaryFunctions/');
 
+
 if nargin<7
     vaccineRange='All';
 end
 if nargin<8
-    R0=3;
+    R0=5;
 end
 if nargin<9
     recoveredprct=0;
@@ -18,14 +19,21 @@ fname=['./data/dataParetoFront_susFactor=',num2str(100*susceptibilityFactor),'_m
 
 %% Select Country
 country="USA";
-% vaccineRangeVec={'above20','above16','above12','above6','All'};
 %% Prepare data
 [uniformAllocation,riskFocusedAllocation,spreadersAllocation,upperBound,vaccinesLeftToDistibute,adultAges,ageAbove60,age40to60,age20to40,IFR,Cij,Ni,Nadult,r,v,infected0_v,infected0_nv]=prepareFinalSizeParameters(country,vaccineRange,recoveredprct,infected_nv_prct,infected_v_prct,VcPrct,betaVac,effVac,maxPrct,true);
-susceptibilityProfile=ones(9,1);susceptibilityProfile(1:2)=susceptibilityFactor;
-Cij=diag(susceptibilityProfile)*Cij;M2=diag(Ni)*Cij*diag(1./Ni);[V,d]=eig(M2);Cij=Cij/max(d(:));
+susceptibilityProfile=ones(9,1);
+
+if susceptibilityFactor==1.5
+    susceptibilityProfile(2)=2;
+elseif susceptibilityFactor==2
+    susceptibilityProfile(1:2)=2;
+end
+
+Cij=diag(susceptibilityProfile)*Cij;
+Mij=diag(Ni)*Cij*diag(1./Ni);[V,d]=eig(Mij);Cij=Cij/max(d(:));
 
 %% Define optimization problem
-problem.options = optimoptions('fmincon','MaxFunctionEvaluations',5e4,'ConstraintTolerance',1e-6,'StepTolerance',1e-10,'Display','none');%,'Algorithm','sqp','Display','none');%,'Display','iter');     
+problem.options = optimoptions('fmincon','MaxFunctionEvaluations',5e4,'ConstraintTolerance',1e-6,'StepTolerance',1e-10,'Display','none');%,'Algorithm','sqp','Display','none');%,'Display','iter');
 problem.solver = 'fmincon';
 problem.Aeq=Nadult';problem.Beq=vaccinesLeftToDistibute;
 problem.A=[];problem.B=[];
@@ -35,22 +43,12 @@ problem.ub=upperBound;
 defineColors;
 %% Run loop
 
-[dummy,overallInfected_uniform,overallMortality_uniform]=computeFinalSize_generalized(uniformAllocation,adultAges,IFR,0,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
-[dummy2,overallInfected_uniform2,overallMortality_uniform2]=computeFinalSize(uniformAllocation,adultAges,IFR,0,R0,Cij,Ni,r,v,infected0_v,infected0_nv,betaVac,effVac,1,1);
-
+[dummy,overallInfected_uniform,overallMortality_uniform,data_uniform]=computeFinalSize_generalized(uniformAllocation,adultAges,IFR,0,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
+                                                                      
 Msample=5000;M=800;
 %% First solve for infection minimizing allocation
 w=0;
 [result,overallInfected_spreaders,overallMortality_spreaders,data_spreaders]=computeFinalSize_generalized(spreadersAllocation,adultAges,IFR,0,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
-% spreadersAllocation=[  0.000000000020792
-%    0.775954805573448
-%    0.999999998655929
-%    0.999999999994571
-%    0.999999999989587
-%    0.433800985346574
-%    0.000000000007171
-%    0.000000000006430
-%    0.000000000015396]
 [x,fval,exitflag,output]=fmincon(@(x)computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1),spreadersAllocation,problem.A,problem.B,problem.Aeq,problem.Beq,problem.lb,problem.ub,[],problem.options);
 [dummy,overallInfected(1),overallMortality(1),data{1}]=computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
 distribution{1}=x;
@@ -64,38 +62,31 @@ end
 if minResult<overallInfected(1)
     [dummy,overallInfected(1),overallMortality(1),data{1}]=computeFinalSize_generalized(sampleAllocation{minIdx},adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
     distribution{1}=sampleAllocation{minIdx};
-    display('Improved at infection minimizing end');
+    display('Improved at infection minimizing end - random allocation');
 end
-infectedConstraint=overallInfected(1);
 parfor kx=1:100
     y=randomizePoint(distribution{1},Ni,Nadult,upperBound,vaccinesLeftToDistibute,0.25);
-    [aux,overallMortality_sample(kx),exitflag,output]=fmincon(@(x)computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1),y,problem.A,problem.B,problem.Aeq,problem.Beq,problem.lb,problem.ub,@(x)mycon(x,infectedConstraint,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac),problem.options);
+    [x,overallInfections_sample(kx),exitflag,output]=fmincon(@(x)computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1),y,problem.A,problem.B,problem.Aeq,problem.Beq,problem.lb,problem.ub,[],problem.options);
     if exitflag<=0
-        overallMortality_sample(kx)=Inf;
+        overallInfections_sample(kx)=Inf;
     end
-    %[dummy,overallInfected_sample(kx),overallMortality_sample(kx),dummy]=computeFinalSize_generalized(aux,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
-    sampleAllocation1{kx}=aux;
+    sampleAllocation1{kx}=x;
 end
 
-[minResult,minIdx]=min(overallMortality_sample(1:100));
-if overallMortality(1)>minResult
+[minResult,minIdx]=min(overallInfections_sample(1:100));
+if minResult<overallInfected(1)
     distribution{1}=sampleAllocation1{minIdx};
     [dummy,overallInfected(1),overallMortality(1),dummy]=computeFinalSize_generalized(distribution{1},adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
-    display(['Improved infection minimizing allocation']);
+    display(['Improved infection minimizing allocation - random seed for optimization']);
 end
+
+% % Find minimal mortality given minimal infections
+% infectedConstraint=overallInfected(1);
+% [dummy,overallInfected_sample(kx),overallMortality_sample(kx),dummy]=computeFinalSize_generalized(aux,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
 
 %% Next solve for mortality minimizing allocation
 w=1;
 [result,overallInfected_riskFocused,overallMortality_riskFocused,data_riskFocused]=computeFinalSize_generalized(riskFocusedAllocation,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
-% spreadersAllocation=[                0
-%                    0
-%                    0
-%    0.538280868634493
-%    1.000000000000000
-%    1.000000000000000
-%    1.000000000000000
-%    1.000000000000000
-%    1.000000000000000];
 x=fmincon(@(x)computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1),spreadersAllocation,problem.A,problem.B,problem.Aeq,problem.Beq,problem.lb,problem.ub,[],problem.options);
 [dummy,overallInfected(M),overallMortality(M),data{M}]=computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
 distribution{M}=x;
@@ -118,6 +109,13 @@ maxInfected=overallInfected(M)
 infectionVec=linspace(minInfected,maxInfected,M);
 w=1;
 %% For each number of infections, minimize mortality
+infectedConstraint=infectionVec(1);
+[x,overallMortality_aux,exitflag,output]=fmincon(@(x)computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1),distribution{1},problem.A,problem.B,problem.Aeq,problem.Beq,problem.lb,problem.ub,@(x)mycon(x,infectedConstraint,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac),problem.options);
+if overallMortality_aux<overallMortality(1)
+  distribution{1}=x;
+  [dummy,overallInfected(1),overallMortality(1),dummy]=computeFinalSize_generalized(distribution{1},adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1);
+end
+
 for ix=2:M-1
     infectedConstraint=infectionVec(ix);
     [x,overallMortality(ix),exitflag,output]=fmincon(@(x)computeFinalSize_generalized(x,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac,1,1),distribution{ix-1},problem.A,problem.B,problem.Aeq,problem.Beq,problem.lb,problem.ub,@(x)mycon(x,infectedConstraint,adultAges,IFR,w,R0,Cij,Ni,r,v,infected0_v,infected0_nv,nuVac,betaVac,effVac),problem.options);

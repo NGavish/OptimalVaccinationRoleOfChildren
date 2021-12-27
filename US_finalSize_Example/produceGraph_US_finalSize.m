@@ -1,17 +1,20 @@
 function produceGraph_US_finalSize(allOrNone)
+% This code produces Figure 1 - Final size of the epidemic, and it's allOrNone version which is presented in the SI.
+
+%% Parameters & setup
+% Leaky vs allOrNone 
 if nargin<1
     allOrNone=false;
 end
 
 % Relative susceptibility of vaccined individuals & efficacy of vaccine in preventing disease
-R0=3;betaVac=0.2;nuVac=1;effVac=0.75;VcPrct=73.2;susceptibilityFactor=[1 1]; fname='US_finalSize_Example';
+R0=6;betaVac=0.1;nuVac=1;effVac=0.5;VcPrct=73.2;susceptibilityFactor=[1 1]; fname='US_finalSize_Example';
 if allOrNone
-    betaVac=0;nuVac=0.8;fname=[fname,'_allOrNone'];
+    betaVac=0;nuVac=0.9;fname=[fname,'_allOrNone'];
 end
 
 maxPrct=100; % Maximal vaccination per age group
 vaccineRangeVec={'All','above20','above20'};
-%countryList={"BEL", "USA", "IND", "ESP", "ZWE", "BRA", "CHN", "ZAF", "POL"};
 country="USA";
 countryData=load(join(['../countryData/',country,'_data.mat'],''));
 
@@ -38,6 +41,7 @@ recoveredprctVec=[0 0 20];infected_nv_prctVec=[0 0 0.25];infected_v_prctVec=[0 0
 figure('Renderer', 'painters', 'Position', [10 10 900 600])
 tiledlayout(3,1, 'TileSpacing','compact','Padding','none');
 
+%% Final Size computations for the three subplots of Figure 1
 for ix=1:3
     vaccineRange=vaccineRangeVec{ix};
     adultAges=adultAgesVec{ix};
@@ -63,6 +67,8 @@ for ix=1:3
     presentData(data,Ni,overallFatality)
     overallInfected_nv
 end
+
+%% Graphics
 linkaxes([axVec{1} axVec{2} axVec{3}],'xy');
 xlim(axVec{1},[0.5 9.5])
 lg = legend(axVec{3},'Vaccinated susceptible','Vaccinated removed','Pre-existing immunity','Non-vaccinated removed','location','northeast','fontsize',10);%,'Orientation','horizontal');%legend(nexttile(2), [line1,line2,line3,line4]);
